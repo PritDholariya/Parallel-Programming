@@ -10,11 +10,12 @@
 
 ####### Node Info #######
 #SBATCH --exclusive
-#SBATCH --nodes=1
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=1
 
 ####### Output #######
 #SBATCH --output=/home/fd0005372/out/ping_pong.out.%j
 #SBATCH --error=/home/fd0005372/out/ping_pong.err.%j
 
 cd /home/fd0005372/mySubdir
-mpirun -n 2 ./ping_pong
+mpirun ./ping_pong

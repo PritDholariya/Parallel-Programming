@@ -53,8 +53,8 @@ int main(int argc, char *argv[])
             MPI_Recv(&ping_pong_count,
                     1,
                     MPI_INT,
-                    sender,
-                    0,
+                    1,
+                    MPI_ANY_TAG,
                     MPI_COMM_WORLD,
                     MPI_STATUS_IGNORE);
 
