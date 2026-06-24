@@ -28,44 +28,44 @@ int main(int argc, char *argv[])
     double start_time = MPI_Wtime();
 
     while (ping_pong_count <= PING_PONG_LIMIT)
-{
-    if (rank == 0)
     {
-        MPI_Send(&ping_pong_count, 1, MPI_INT, 1, 0, MPI_COMM_WORLD);
-        printf("Rank 0 sent %d to Rank 1\n", ping_pong_count);
+        if ((ping_pong_count % 2 == 1 && rank == 0) ||
+            (ping_pong_count % 2 == 0 && rank == 1))
+        {
+            int receiver = 1 - rank;
 
-        ping_pong_count++;
+            MPI_Send(&ping_pong_count,
+                    1,
+                    MPI_INT,
+                    receiver,
+                    0,
+                    MPI_COMM_WORLD);
 
-        if (ping_pong_count > PING_PONG_LIMIT)
-            break;
+            printf("Rank %d sent ping_pong_count %d to Rank %d\n",
+                rank,
+                ping_pong_count,
+                receiver);
+        }
+        else
+        {
+            int sender = 1 - rank;
 
-        MPI_Recv(&ping_pong_count, 1, MPI_INT, 1, 0,
-                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            MPI_Recv(&ping_pong_count,
+                    1,
+                    MPI_INT,
+                    sender,
+                    0,
+                    MPI_COMM_WORLD,
+                    MPI_STATUS_IGNORE);
 
-        printf("Rank 0 received %d from Rank 1\n", ping_pong_count);
+            printf("Rank %d received ping_pong_count %d from Rank %d\n",
+                rank,
+                ping_pong_count,
+                sender);
+        }
 
-        ping_pong_count++;
+        ping_pong_count++;  
     }
-    else
-    {
-        MPI_Recv(&ping_pong_count, 1, MPI_INT, 0, 0,
-                 MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-        printf("Rank 1 received %d from Rank 0\n", ping_pong_count);
-
-        ping_pong_count++;
-
-        if (ping_pong_count > PING_PONG_LIMIT)
-            break;
-
-        MPI_Send(&ping_pong_count, 1, MPI_INT, 0, 0,
-                 MPI_COMM_WORLD);
-
-        printf("Rank 1 sent %d to Rank 0\n", ping_pong_count);
-
-        ping_pong_count++;
-    }
-}
 
     double end_time = MPI_Wtime();
 
@@ -78,3 +78,7 @@ int main(int argc, char *argv[])
     MPI_Finalize();
     return 0;
 }
+
+
+//mpicc -O2 -Wall -Wextra -o ping_pong ping_pong.c
+//mpirun -n 2 ./ping_pong
